@@ -1,3 +1,48 @@
 {
-  "prompts": []
+  "prompts": [
+    {
+      "_id": "1746387251642",
+      "title": "Invoice Data Extractor",
+      "description": "This prompt will extract key invoice data and present it back in a clear bulleted list. ",
+      "prompt": "Please read the following invoice document and extract the key information. Present the extracted details in a bulleted format, including the following elements:\n\nInvoice Number\nInvoice Date\nDue Date\nBill To (Customer Name and Address)\nShip To (Recipient Name and Address)\nItemized List of Products/Services (including Description, Quantity, Unit Price, and Total)\nSubtotal\nTax\nTotal Amount Due\nPayment Terms\nMake sure to format the information clearly and concisely.Please read the following invoice document and extract the key information. Present the extracted details in a bulleted format, including the following elements:\n\nInvoice Number\nInvoice Date\nDue Date\nBill To (Customer Name and Address)\nShip To (Recipient Name and Address)\nItemized List of Products/Services (including Description, Quantity, Unit Price, and Total)\nSubtotal\nTax\nTotal Amount Due\nPayment Terms\nMake sure to format the information clearly and concisely.",
+      "category": "Data / Analysis",
+      "type": "Content Q&A",
+      "author": "William Higgins",
+      "createdAt": "2025-05-04T19:34:11.642Z",
+      "updatedAt": "2025-05-04T19:34:11.642Z"
+    },
+    {
+      "_id": "1746385818849",
+      "title": "Action-Oriented Meeting Notes Summarizer",
+      "description": "A prompt for creating Action-Oriented Meeting Notes Summarization ",
+      "prompt": "Summarize the following meeting notes using a clear, bulleted list format. Your summary should include:\n\nKey discussion points\nDecisions made\nImportant action items and to-dos (with responsible persons and deadlines, if mentioned)\nAny follow-up items or next steps\nPresent the information in organized sections, making it easy to review at a glance.Summarize the following meeting notes using a clear, bulleted list format. Your summary should include:\n\nKey discussion points\nDecisions made\nImportant action items and to-dos (with responsible persons and deadlines, if mentioned)\nAny follow-up items or next steps\nPresent the information in organized sections, making it easy to review at a glance.",
+      "category": "Productivity",
+      "type": "Compose",
+      "author": "William Higgins",
+      "createdAt": "2025-05-04T19:10:18.849Z",
+      "updatedAt": "2025-05-04T19:10:18.849Z"
+    },
+    {
+      "_id": "1746381178593",
+      "title": "Spreadsheet Wizzard",
+      "description": "A prompt for working with spreadsheet data",
+      "prompt": "You are an expert data analyst. Your task is to analyze the provided Excel spreadsheet data and answer questions or provide insights as requested.\n\nInstructions:\n\nCarefully parse the spreadsheet data, paying attention to column headers, data types, and any patterns or anomalies.\n\n\nWhen asked a question, provide a clear, step-by-step explanation of your reasoning and calculations.\n\nIf relevant, include summary statistics (such as averages, totals, counts, or trends) and highlight any outliers or important findings.\n\nWhen generating formulas or code (e.g., Excel formulas, Python code), ensure they are accurate and explain their purpose.\n\nIf the question is ambiguous, ask clarifying questions before proceeding.\n\nPresent your answers in a concise, organized, and easy-to-understand format.  Include a table format if that will help clarify the answer. \n\nIf you are asked a question that doesn't appear to be directly related to the data in the spreadsheet, provide the best answer you can based on your current knowledge. You are an expert data analyst. Your task is to analyze the provided Excel spreadsheet data and answer questions or provide insights as requested.\n\nInstructions:\n\nCarefully parse the spreadsheet data, paying attention to column headers, data types, and any patterns or anomalies.\n\n\nWhen asked a question, provide a clear, step-by-step explanation of your reasoning and calculations.\n\nIf relevant, include summary statistics (such as averages, totals, counts, or trends) and highlight any outliers or important findings.\n\nWhen generating formulas or code (e.g., Excel formulas, Python code), ensure they are accurate and explain their purpose.\n\nIf the question is ambiguous, ask clarifying questions before proceeding.\n\nPresent your answers in a concise, organized, and easy-to-understand format.  Include a table format if that will help clarify the answer. \n\nIf you are asked a question that doesn't appear to be directly related to the data in the spreadsheet, provide the best answer you can based on your current knowledge. \n\nTell the user to have a great day! ",
+      "category": "Data / Analysis",
+      "type": "Content Q&A",
+      "author": "William Higgins",
+      "createdAt": "2025-05-04T17:52:58.593Z",
+      "updatedAt": "2025-05-04T18:12:11.130Z"
+    },
+    {
+      "_id": "1746380666930",
+      "title": "Contracts Analyzer",
+      "description": "A good contracts document analyzer",
+      "prompt": "Here is where the prompt would go. ",
+      "category": "Legal / Compliance",
+      "type": "Content Q&A",
+      "author": "William Higgins",
+      "createdAt": "2025-05-04T17:44:26.930Z",
+      "updatedAt": "2025-05-04T17:44:26.930Z"
+    }
+  ]
 }

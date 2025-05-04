@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: prompt-library-api
+    env: node
+    buildCommand: npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: prompt-library-db
+          property: connectionString
+
+databases:
+  - name: prompt-library-db
+    databaseName: promptlibrary
+    ipAllowList: []
