@@ -32,7 +32,7 @@ const categoryColors = {
   "HR / Recruiting": "border-lime-500"
 };
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export default function PromptLibrary() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
