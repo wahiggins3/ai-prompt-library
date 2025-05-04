@@ -3,6 +3,14 @@ import React from 'react';
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
+const promptTypes = [
+  "Content Q&A",
+  "Compose",
+  "Image Analysis",
+  "Extract",
+  "Agent"
+];
+
 const categories = [
   "Writing", "Productivity", "Coding / Dev", "Marketing / Sales", "Business Strategy",
   "Data / Analysis", "Creative / Fun", "Customer Support", "Education / Learning",
@@ -29,7 +37,7 @@ const API_URL = 'http://localhost:3000/api';
 export default function PromptLibrary() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
   const [prompts, setPrompts] = useState([]);
-  const [newPrompt, setNewPrompt] = useState({ title: "", description: "", prompt: "", category: "Writing", author: "" });
+  const [newPrompt, setNewPrompt] = useState({ title: "", description: "", prompt: "", category: "Writing", type: "Content Q&A", author: "" });
   const [modalPrompt, setModalPrompt] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState(null);
@@ -37,7 +45,8 @@ export default function PromptLibrary() {
   const [search, setSearch] = useState("");
   const [sortOption, setSortOption] = useState("title");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [selectedType, setSelectedType] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
 
   // Fetch prompts from API
   useEffect(() => {
@@ -53,46 +62,50 @@ export default function PromptLibrary() {
   }, []);
   useEffect(() => localStorage.setItem("darkMode", darkMode), [darkMode]);
 
+  const resetForm = () => {
+    setNewPrompt({ 
+      title: "", 
+      description: "", 
+      prompt: "", 
+      category: "Writing", 
+      type: "Content Q&A", 
+      author: "" 
+    });
+    setIsEditing(false);
+    setEditingPrompt(null);
+  };
+
   const handleAddPrompt = async () => {
-    console.log('handleAddPrompt called');
-    console.log('Current newPrompt:', newPrompt);
-    
     if (!newPrompt.title || !newPrompt.prompt) {
-      console.log('Missing required fields');
       return;
     }
 
     try {
-      console.log('Sending POST request to:', `${API_URL}/prompts`);
       const response = await axios.post(`${API_URL}/prompts`, newPrompt);
-      console.log('Server response:', response.data);
-      
       setPrompts([response.data, ...prompts]);
-      setNewPrompt({ title: "", description: "", prompt: "", category: "Writing", author: "" });
+      resetForm();
       setAddModalOpen(false);
     } catch (error) {
       console.error('Error adding prompt:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-      }
     }
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     const text = modalPrompt?.prompt;
     if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(modalPrompt._id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
-  const handleEdit = async (prompt) => {
+  const handleEdit = (prompt) => {
     setEditingPrompt(prompt);
     setIsEditing(true);
-    setModalPrompt(null);
-    setNewPrompt(prompt);
+    setNewPrompt({ ...prompt });
     setAddModalOpen(true);
   };
 
@@ -109,14 +122,15 @@ export default function PromptLibrary() {
   };
 
   const handleUpdate = async () => {
-    if (newPrompt.title && newPrompt.prompt) {
+    if (editingPrompt && newPrompt.title && newPrompt.prompt) {
       try {
-        const response = await axios.put(`${API_URL}/prompts/${editingPrompt._id}`, newPrompt);
+        const response = await axios.put(`${API_URL}/prompts/${editingPrompt._id}`, {
+          ...newPrompt,
+          updatedAt: new Date().toISOString()
+        });
         setPrompts(prompts.map(p => p._id === editingPrompt._id ? response.data : p));
-        setNewPrompt({ title: "", description: "", prompt: "", category: "Writing", author: "" });
+        resetForm();
         setAddModalOpen(false);
-        setIsEditing(false);
-        setEditingPrompt(null);
       } catch (error) {
         console.error('Error updating prompt:', error);
       }
@@ -126,54 +140,81 @@ export default function PromptLibrary() {
   return (
     <div className={darkMode ? 'dark bg-gray-900 text-white min-h-screen' : 'bg-white text-black min-h-screen'}>
       <div className="p-4 max-w-7xl mx-auto">
-        <div className="mb-4 text-center">
-          <h1 className="text-3xl font-bold">Box AI Prompt Library</h1>
-        </div>
-
-        <div className="flex flex-col gap-4 mb-6 max-w-2xl mx-auto w-full">
-          <div className="flex gap-4">
-            <input 
-              className={`flex-1 p-2 border border-gray-400 rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
-              placeholder="Search prompts..." 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value.toLowerCase())} 
-            />
-            <button 
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap" 
-              onClick={() => setAddModalOpen(true)}
-            >
-              + Add Prompt
-            </button>
-          </div>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold mb-6">Box AI Prompt Library</h1>
           
-          <div className="flex flex-col sm:flex-row gap-4">
-            <select 
-              className={`w-full p-2 border border-gray-400 rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
-              value={sortOption} 
-              onChange={(e) => setSortOption(e.target.value)}
-            >
-              <option value="title">Title (A-Z)</option>
-              <option value="category">Category (A-Z)</option>
-              <option value="author">Author (A-Z)</option>
-            </select>
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="flex flex-col gap-6">
+              {/* Search and Add Row */}
+              <div className="flex gap-4 items-center justify-center">
+                <div className="flex-1 max-w-3xl">
+                  <input 
+                    className={`w-full h-10 px-4 border border-gray-400 rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
+                    placeholder="Search prompts..." 
+                    value={search} 
+                    onChange={(e) => setSearch(e.target.value.toLowerCase())} 
+                  />
+                </div>
+                <button
+                  className={`text-white px-6 py-2 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}`}
+                  onClick={() => {
+                    resetForm();
+                    setAddModalOpen(true);
+                  }}
+                >
+                  Add Prompt
+                </button>
+              </div>
+              
+              {/* Filters Row */}
+              <div className="flex gap-4 items-center justify-center">
+                <div className="flex gap-4 items-center flex-wrap justify-center">
+                  <select 
+                    className={`h-10 px-4 border border-gray-400 rounded-lg min-w-[180px] ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
+                    value={sortOption} 
+                    onChange={(e) => setSortOption(e.target.value)}
+                  >
+                    <option value="title">Sort by: Title (A-Z)</option>
+                    <option value="category">Sort by: Category (A-Z)</option>
+                    <option value="author">Sort by: Author (A-Z)</option>
+                    <option value="type">Sort by: Type (A-Z)</option>
+                  </select>
 
-            <select 
-              className={`w-full p-2 border border-gray-400 rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
-              value={selectedCategory} 
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <div className="text-left mt-2">
-              <button 
-                className="text-xs underline text-blue-500 hover:text-blue-700" 
-                onClick={() => { setSearch(""); setSelectedCategory(""); setSortOption("title"); }}
-              >
-                Clear All Filters
-              </button>
+                  <select 
+                    className={`h-10 px-4 border border-gray-400 rounded-lg min-w-[180px] ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
+                    value={selectedCategory} 
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
+                    <option value="">Filter by Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+
+                  <select 
+                    className={`h-10 px-4 border border-gray-400 rounded-lg min-w-[180px] ${darkMode ? 'bg-gray-800 text-white border-gray-600' : ''}`} 
+                    value={selectedType} 
+                    onChange={(e) => setSelectedType(e.target.value)}
+                  >
+                    <option value="">Filter by Type</option>
+                    {promptTypes.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+
+                  <button 
+                    className="text-xs underline text-blue-500 hover:text-blue-700 h-10 flex items-center" 
+                    onClick={() => { 
+                      setSearch(""); 
+                      setSelectedCategory(""); 
+                      setSelectedType("");
+                      setSortOption("title"); 
+                    }}
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -182,33 +223,47 @@ export default function PromptLibrary() {
           {prompts
             .filter(p =>
               (!selectedCategory || p.category === selectedCategory) &&
+              (!selectedType || p.type === selectedType) &&
               (p.title.toLowerCase().includes(search) ||
                 p.description.toLowerCase().includes(search) ||
                 p.prompt.toLowerCase().includes(search) ||
                 p.category.toLowerCase().includes(search) ||
-                (p.author && p.author.toLowerCase().includes(search)))
-            )
+                (p.type && p.type.toLowerCase().includes(search)) ||
+                (p.author && p.author.toLowerCase().includes(search))))
             .sort((a, b) => (!a[sortOption] || !b[sortOption]) ? 0 : a[sortOption].localeCompare(b[sortOption]))
             .map((item, index) => (
               <div key={index} className={`rounded-lg border-2 ${categoryColors[item.category] || 'border-gray-300'} shadow p-4`}>
                 <div className="cursor-pointer" onClick={() => setModalPrompt(item)}>
-                <div className="font-semibold text-lg mb-1">{item.title}</div>
-                <div className="text-sm text-gray-600 mb-1">{item.description}</div>
-                <div className="text-xs text-gray-500 mb-2 italic">by {item.author || "Unknown"}</div>
-                <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-800">{item.category}</span>
+                  <div className="font-semibold text-lg mb-1">{item.title}</div>
+                  <div className="text-sm text-gray-600 mb-1">{item.description}</div>
+                  <div className="text-xs text-gray-500 mb-2 italic">by {item.author || "Unknown"}</div>
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-800">{item.category}</span>
+                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-800">{item.type || 'Content Q&A'}</span>
+                  </div>
                 </div>
                 <div className="mt-2 flex justify-end gap-2">
                   <button
-                    onClick={() => handleEdit(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(item.prompt).then(() => {
+                        setCopiedId(item._id);
+                        setTimeout(() => setCopiedId(null), 2000);
+                      });
+                    }}
+                    className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 flex items-center gap-1"
+                  >
+                    Copy
+                    {copiedId === item._id && <span className="text-xs bg-green-500 text-white px-1 rounded">✓</span>}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(item);
+                    }}
                     className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
                   >
                     Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                  >
-                    Delete
                   </button>
                 </div>
               </div>
@@ -222,21 +277,43 @@ export default function PromptLibrary() {
               <h2 className="text-xl font-semibold mb-2">{modalPrompt.title}</h2>
               <p className="text-sm text-gray-500 mb-1 italic">by {modalPrompt.author || "Unknown"}</p>
               <p className="text-sm mb-2">{modalPrompt.description}</p>
+              <div className="flex gap-4 mb-4">
+                <div>
+                  <span className="text-sm text-gray-500">Category:</span>
+                  <span className="ml-2 text-sm px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-800">{modalPrompt.category}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Type:</span>
+                  <span className="ml-2 text-sm px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-800">{modalPrompt.type || 'Content Q&A'}</span>
+                </div>
+              </div>
               <textarea readOnly className={`w-full h-48 p-3 border rounded resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-gray-100 text-black border-gray-300'}`}>{modalPrompt.prompt}</textarea>
               <div className="text-right text-blue-600 font-bold text-sm mt-1">{modalPrompt.prompt.length} characters</div>
               <div className="flex justify-between items-center mt-3">
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                   <button 
-                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" 
-                    onClick={isEditing ? handleUpdate : handleAddPrompt}
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2" 
+                    onClick={handleCopy}
                   >
-                    {isEditing ? 'Update Prompt' : 'Save Prompt'}
+                    <span>Copy Prompt</span>
+                    {copiedId === modalPrompt._id && <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded">Copied!</span>}
                   </button>
-                  <button className="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded" onClick={() => handleEdit(modalPrompt)}>Edit</button>
-                  <button className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onClick={() => handleDelete(modalPrompt._id)}>Delete</button>
+                  <button 
+                    className="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded" 
+                    onClick={() => {
+                      handleEdit(modalPrompt);
+                      setModalPrompt(null);
+                    }}
+                  >
+                    Edit
+                  </button>
                 </div>
-                {copied && <span className="text-green-500 text-sm">Copied!</span>}
-                <button className="text-sm text-red-500 ml-auto" onClick={() => setModalPrompt(null)}>Close</button>
+                <button 
+                  className="text-sm bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded" 
+                  onClick={() => setModalPrompt(null)}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
@@ -248,9 +325,9 @@ export default function PromptLibrary() {
             <div className={`w-full max-w-2xl ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} p-6 rounded-lg shadow-lg`}>
               <form onSubmit={(e) => {
                 e.preventDefault();
-                handleAddPrompt();
+                isEditing ? handleUpdate() : handleAddPrompt();
               }}>
-                <h2 className="text-lg font-semibold mb-4">Add New Prompt</h2>
+                <h2 className="text-lg font-semibold mb-4">{isEditing ? 'Edit Prompt' : 'Add New Prompt'}</h2>
               <input 
                 type="text" 
                 placeholder="Title" 
@@ -299,25 +376,69 @@ export default function PromptLibrary() {
                   setNewPrompt({ ...newPrompt, author: pastedText });
                 }}
               />
-              <select className={`w-full mb-4 p-2 border rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} value={newPrompt.category} onChange={(e) => setNewPrompt({ ...newPrompt, category: e.target.value })}>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <div className="flex justify-end gap-2">
-                <button 
-                  type="button"
-                  className="px-4 py-2 rounded bg-gray-400 hover:bg-gray-500 text-white" 
-                  onClick={() => setAddModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Add Prompt
-                </button>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Category</label>
+                  <div className="text-xs text-gray-500 mb-1">Group your prompt by its primary use case</div>
+                  <select 
+                    className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                    value={newPrompt.category} 
+                    onChange={(e) => setNewPrompt({ ...newPrompt, category: e.target.value })}
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Type</label>
+                  <div className="text-xs text-gray-500 mb-1">Select how this prompt will be used</div>
+                  <select 
+                    className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                    value={newPrompt.type} 
+                    onChange={(e) => setNewPrompt({ ...newPrompt, type: e.target.value })}
+                  >
+                    {promptTypes.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                {isEditing && (
+                  <button 
+                    type="button" 
+                    className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded" 
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this prompt?')) {
+                        handleDelete(editingPrompt._id);
+                        setAddModalOpen(false);
+                      }
+                    }}
+                  >
+                    Delete Prompt
+                  </button>
+                )}
+                <div className="flex gap-2">
+                  <button 
+                    type="button" 
+                    className="text-sm text-red-500" 
+                    onClick={() => {
+                      setAddModalOpen(false);
+                      if (!isEditing) {
+                        resetForm();
+                      }
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                  >
+                    {isEditing ? 'Save Changes' : 'Add Prompt'}
+                  </button>
+                </div>
               </div>
               </form>
             </div>
