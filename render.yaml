@@ -4,8 +4,10 @@ services:
     env: node
     runtime: node
     nodeVersion: 18.x
+    rootDirectory: /opt/render/project/src
     buildCommand: |
+      cd /opt/render/project/src
       npm install
       npm run build
-    startCommand: npm start
+    startCommand: cd /opt/render/project/src && node server.js
 
