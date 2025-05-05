@@ -1,42 +1,23 @@
 import pg from 'pg';
 const { Pool } = pg;
 
-// Log environment for debugging
-console.log('Environment:', {
-  NODE_ENV: process.env.NODE_ENV,
-  DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'not set',
-  PGHOST: process.env.PGHOST || 'not set',
-  PGPORT: process.env.PGPORT || 'not set',
-  PGDATABASE: process.env.PGDATABASE || 'not set',
-  PGUSER: process.env.PGUSER ? 'set' : 'not set',
-});
-
-// Try to use DATABASE_URL first, if not available use individual connection params
-let config;
-
-if (process.env.DATABASE_URL) {
-  console.log('Using DATABASE_URL for connection');
-  config = {
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  };
-} else if (process.env.PGHOST && process.env.PGUSER) {
-  console.log('Using individual PG* variables for connection');
-  config = {
-    host: process.env.PGHOST,
-    port: parseInt(process.env.PGPORT || '5432', 10),
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    database: process.env.PGDATABASE,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  };
-} else {
-  throw new Error('No database connection information available');
+if (!process.env.DATABASE_URL) {
+  console.error('DATABASE_URL is required but not set');
+  process.exit(1);
 }
+
+console.log('Database URL is configured:', process.env.DATABASE_URL ? 'Yes' : 'No');
+
+const config = {
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  // Add some reasonable defaults for a production environment
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+};
 
 console.log('Database config (without sensitive data):', {
   host: config.host || 'from connection string',

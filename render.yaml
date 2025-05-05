@@ -1,12 +1,4 @@
 services:
-  # First, define the PostgreSQL database service
-  - type: pserv
-    name: prompt-library-db
-    env: postgres
-    plan: hobby
-    ipAllowList: [] # only allow internal connections
-
-  # Then, define the web service that depends on the database
   - type: web
     name: prompt-library-api
     env: node
@@ -16,33 +8,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: connectionString
-      - key: PGHOST
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: host
-      - key: PGPORT
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: port
-      - key: PGUSER
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: user
-      - key: PGPASSWORD
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: password
-      - key: PGDATABASE
-        fromService:
-          type: pserv
-          name: prompt-library-db
-          property: database
+        sync: false # Render will automatically inject this
+
+databases:
+  - name: prompt-library-db
+    databaseName: prompt_library
+    plan: hobby
 
