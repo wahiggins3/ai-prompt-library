@@ -1,4 +1,4 @@
-const pg = require('pg');
+const { Pool } = require('pg');
 
 // Default to localhost if no DATABASE_URL is provided
 const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/promptlibrary';
