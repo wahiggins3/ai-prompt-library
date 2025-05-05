@@ -525,6 +525,11 @@ export default function PromptLibrary() {
           <div className="flex flex-col items-center justify-center text-center">
             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               © {new Date().getFullYear()} AI Prompt Library. Created by William Higgins.
+              {!import.meta.env.PROD && (
+                <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full border border-yellow-500/20">
+                  Development Mode
+                </span>
+              )}
             </p>
             <div className="mt-2 flex items-center gap-2 text-sm">
               <a 
