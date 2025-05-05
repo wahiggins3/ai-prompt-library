@@ -261,10 +261,10 @@ export default function PromptLibrary() {
               .sort((a, b) => (!a[sortOption] || !b[sortOption]) ? 0 : a[sortOption].localeCompare(b[sortOption]))
               .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
               .map((item, index) => (
-              <div key={index} className={`rounded-xl ${categoryColors[item.category] || 'border-gray-300'} ${darkMode ? 'bg-gray-800/50' : 'bg-white'} shadow-sm hover:shadow-md transition-all duration-200 border-2 overflow-hidden flex flex-col`}>
+              <div key={index} className={`rounded-xl ${categoryColors[item.category] || 'border-gray-300'} ${darkMode ? 'bg-gray-800/50' : 'bg-white'} shadow-sm hover:shadow-md transition-all duration-200 border-2 overflow-hidden flex flex-col h-[200px]`}>
                 <div className="cursor-pointer flex-1 p-4" onClick={() => setModalPrompt(item)}>
                   <div className="font-semibold text-lg mb-1">{item.title}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">{item.description}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1 line-clamp-2">{item.description}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 italic">by {item.author || "Unknown"}</div>
                   <div className="flex gap-2 flex-wrap">
                     <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">{item.category}</span>
@@ -408,24 +408,26 @@ export default function PromptLibrary() {
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
                     <input 
                       type="text" 
-                      placeholder="Enter a descriptive title" 
+                      placeholder="Enter a descriptive title (max 50 chars)" 
                       className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.title} 
+                      maxLength={50}
                       onChange={(e) => setNewPrompt({ ...newPrompt, title: e.target.value })} 
-
                     />
+                    <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-1">{newPrompt.title.length}/50</div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Description</label>
                     <input 
                       type="text" 
-                      placeholder="Brief description of what this prompt does" 
+                      placeholder="Brief description of what this prompt does (max 120 chars)" 
                       className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.description} 
+                      maxLength={120}
                       onChange={(e) => setNewPrompt({ ...newPrompt, description: e.target.value })} 
-
                     />
+                    <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-1">{newPrompt.description.length}/120</div>
                   </div>
 
                   <div>
