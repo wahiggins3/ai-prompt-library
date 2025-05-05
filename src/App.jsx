@@ -412,11 +412,7 @@ export default function PromptLibrary() {
                       className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.title} 
                       onChange={(e) => setNewPrompt({ ...newPrompt, title: e.target.value })} 
-                      onPaste={(e) => {
-                        e.stopPropagation();
-                        const pastedText = e.clipboardData.getData('text');
-                        setNewPrompt({ ...newPrompt, title: pastedText });
-                      }}
+
                     />
                   </div>
 
@@ -428,11 +424,7 @@ export default function PromptLibrary() {
                       className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.description} 
                       onChange={(e) => setNewPrompt({ ...newPrompt, description: e.target.value })} 
-                      onPaste={(e) => {
-                        e.stopPropagation();
-                        const pastedText = e.clipboardData.getData('text');
-                        setNewPrompt({ ...newPrompt, description: pastedText });
-                      }}
+
                     />
                   </div>
 
@@ -443,11 +435,7 @@ export default function PromptLibrary() {
                       className={`w-full p-2 border rounded-lg h-48 resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.prompt} 
                       onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })} 
-                      onPaste={(e) => {
-                        e.stopPropagation();
-                        const pastedText = e.clipboardData.getData('text');
-                        setNewPrompt({ ...newPrompt, prompt: pastedText });
-                      }}
+
                     />
                     <div className="text-right text-blue-600 dark:text-blue-400 font-medium text-sm mt-1">{newPrompt.prompt.length} characters</div>
                   </div>
@@ -460,11 +448,7 @@ export default function PromptLibrary() {
                       className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.author} 
                       onChange={(e) => setNewPrompt({ ...newPrompt, author: e.target.value })} 
-                      onPaste={(e) => {
-                        e.stopPropagation();
-                        const pastedText = e.clipboardData.getData('text');
-                        setNewPrompt({ ...newPrompt, author: pastedText });
-                      }}
+
                     />
                   </div>
                 </div>
