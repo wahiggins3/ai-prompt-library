@@ -2,28 +2,41 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import pg from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const { Pool } = pg;
 
-// In Render's environment, use the internal database URL
+// Log the database URL we're using (without sensitive info)
+console.log('Using database URL:', process.env.RENDER_INTERNAL_DATABASE_URL ? 'RENDER_INTERNAL_DATABASE_URL' : 'DATABASE_URL');
+
 const pool = new Pool({
   connectionString: process.env.RENDER_INTERNAL_DATABASE_URL || process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Test database connection
+try {
+  const client = await pool.connect();
+  console.log('Successfully connected to database');
+  client.release();
+} catch (err) {
+  console.error('Database connection error:', err.message);
+  process.exit(1);
+}
+
 async function migrateData() {
   try {
     // Read JSON file
     const jsonPath = path.join(__dirname, '..', 'db.json');
+    console.log('Looking for JSON file at:', jsonPath);
+    
     const jsonData = await fs.readFile(jsonPath, 'utf8');
+    console.log('Successfully read JSON file');
+    
     const { prompts } = JSON.parse(jsonData);
-
     console.log(`Found ${prompts.length} prompts to migrate`);
 
     // Create table if it doesn't exist
