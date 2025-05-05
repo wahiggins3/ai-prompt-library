@@ -42,6 +42,7 @@ export default function PromptLibrary() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newPrompt, setNewPrompt] = useState({ title: "", description: "", prompt: "", category: "Writing", type: "Content Q&A", author: "" });
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [modalPrompt, setModalPrompt] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState(null);
@@ -405,6 +406,41 @@ export default function PromptLibrary() {
                 <h2 className="text-lg font-semibold mb-6">{isEditing ? 'Edit Prompt' : 'Add New Prompt'}</h2>
                 <div className="space-y-4">
                   <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Prompt Text</label>
+                    <textarea 
+                      placeholder="Enter your prompt text here" 
+                      className={`w-full p-2 border rounded-lg h-48 resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                      value={newPrompt.prompt} 
+                      onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })} 
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      <button
+                        type="button"
+                        className={`text-sm px-3 py-1 rounded ${newPrompt.prompt.length < 10 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+                        disabled={newPrompt.prompt.length < 10 || isSuggesting}
+                        onClick={async () => {
+                          setIsSuggesting(true);
+                          try {
+                            const response = await axios.post(`${API_URL}/suggest`, { prompt: newPrompt.prompt });
+                            setNewPrompt(prev => ({
+                              ...prev,
+                              title: response.data.title,
+                              description: response.data.description
+                            }));
+                          } catch (error) {
+                            console.error('Error getting suggestions:', error);
+                          } finally {
+                            setIsSuggesting(false);
+                          }
+                        }}
+                      >
+                        {isSuggesting ? 'Thinking...' : 'Suggest Title & Description'}
+                      </button>
+                      <div className="text-blue-600 dark:text-blue-400 font-medium text-sm">{newPrompt.prompt.length} characters</div>
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
                     <input 
                       type="text" 
@@ -428,18 +464,6 @@ export default function PromptLibrary() {
                       onChange={(e) => setNewPrompt({ ...newPrompt, description: e.target.value })} 
                     />
                     <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-1">{newPrompt.description.length}/120</div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Prompt Text</label>
-                    <textarea 
-                      placeholder="Enter your prompt text here" 
-                      className={`w-full p-2 border rounded-lg h-48 resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
-                      value={newPrompt.prompt} 
-                      onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })} 
-
-                    />
-                    <div className="text-right text-blue-600 dark:text-blue-400 font-medium text-sm mt-1">{newPrompt.prompt.length} characters</div>
                   </div>
 
                   <div>

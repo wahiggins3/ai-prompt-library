@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { query, pool } from './db.js';
+import { generateSuggestions } from './ai.js';
 
 // Test database connection
 pool.connect()
@@ -27,6 +28,21 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// AI suggestion endpoint
+app.post('/api/suggest', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+    const suggestions = await generateSuggestions(prompt);
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error in /api/suggest:', error);
+    res.status(500).json({ error: 'Failed to generate suggestions' });
+  }
+});
 
 // Routes
 app.get('/api/prompts', async (req, res) => {
