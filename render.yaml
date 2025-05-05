@@ -2,6 +2,10 @@ services:
   - type: web
     name: prompt-library-api
     env: node
-    buildCommand: npm install && cd server && npm install && npm install openai@^4.0.0
-    startCommand: NODE_ENV=production node server/index.js
+    buildCommand: |
+      npm install
+      cd server
+      npm install
+      npm install openai@^4.0.0
+    startCommand: cd server && NODE_ENV=production node index.js
 
