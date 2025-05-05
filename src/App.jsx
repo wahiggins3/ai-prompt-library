@@ -39,6 +39,8 @@ export default function PromptLibrary() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
   const [prompts, setPrompts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [newPrompt, setNewPrompt] = useState({ title: "", description: "", prompt: "", category: "Writing", type: "Content Q&A", author: "" });
   const [modalPrompt, setModalPrompt] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,19 +51,32 @@ export default function PromptLibrary() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [copiedId, setCopiedId] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   // Fetch prompts from API
   useEffect(() => {
     const fetchPrompts = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        const response = await axios.get(`${API_URL}/prompts`);
+        const response = await axios.get(`${API_URL}/prompts`, {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'If-None-Match': ''
+          },
+          params: { _t: Date.now() } // Prevent caching
+        });
         setPrompts(response.data);
       } catch (error) {
         console.error('Error fetching prompts:', error);
+        setError('Failed to load prompts. Please try refreshing the page.');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPrompts();
-  }, []);
+  }, [lastRefresh]); // Add lastRefresh to dependencies
   useEffect(() => localStorage.setItem("darkMode", darkMode), [darkMode]);
 
   const resetForm = () => {
@@ -137,6 +152,11 @@ export default function PromptLibrary() {
         console.error('Error updating prompt:', error);
       }
     }
+  };
+
+  // Function to force refresh data
+  const refreshData = () => {
+    setLastRefresh(Date.now());
   };
 
   return (
@@ -260,7 +280,7 @@ export default function PromptLibrary() {
                         setTimeout(() => setCopiedId(null), 2000);
                       });
                     }}
-                    className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded hover:bg-green-200 flex items-center gap-1"
+                    className="text-xs bg-green-100 text-green-600 rounded hover:bg-green-200 flex items-center gap-1"
                   >
                     Copy
                     {copiedId === item._id && <span className="text-xs bg-green-500 text-white px-1 rounded">✓</span>}
@@ -270,7 +290,7 @@ export default function PromptLibrary() {
                       e.stopPropagation();
                       handleEdit(item);
                     }}
-                    className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                    className="text-xs bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
                   >
                     Edit
                   </button>
@@ -318,7 +338,7 @@ export default function PromptLibrary() {
                     onClick={handleCopy}
                   >
                     <span>Copy Prompt</span>
-                    {copiedId === modalPrompt._id && <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded">Copied!</span>}
+                    {copiedId === modalPrompt._id && <span className="text-xs bg-green-500 text-white px-1 rounded">Copied!</span>}
                   </button>
                   <button 
                     className="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded" 
@@ -521,10 +541,30 @@ export default function PromptLibrary() {
 
       {/* Footer */}
       <footer className={`mt-16 py-8 border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-center text-center">
+        <div className="container mx-auto px-4 py-8">
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+            <span className="block sm:inline">{error}</span>
+            <button
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+              onClick={refreshData}
+            >
+              <span className="text-xl">&times;</span>
+            </button>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex justify-center items-center mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-2 text-gray-600 dark:text-gray-400">Loading prompts...</span>
+          </div>
+        )}
+
+        {/* Search and Filter Section */}
+        <div className="flex flex-col items-center justify-center text-center">
             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              © {new Date().getFullYear()} AI Prompt Library. Created by William Higgins.
+              &copy; {new Date().getFullYear()} AI Prompt Library. Created by William Higgins.
               {!import.meta.env.PROD && (
                 <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full border border-yellow-500/20">
                   Development Mode
