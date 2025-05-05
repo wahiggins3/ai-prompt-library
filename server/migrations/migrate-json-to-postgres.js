@@ -12,18 +12,32 @@ const { Pool } = pg;
 // Log the database URL we're using (without sensitive info)
 console.log('Using database URL:', process.env.RENDER_INTERNAL_DATABASE_URL ? 'RENDER_INTERNAL_DATABASE_URL' : 'DATABASE_URL');
 
+// Print available environment variables (without values)
+console.log('Available environment variables:', Object.keys(process.env));
+
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) {
+  console.error('No DATABASE_URL environment variable found');
+  process.exit(1);
+}
+
+console.log('Connecting to database...');
+
 const pool = new Pool({
-  connectionString: process.env.RENDER_INTERNAL_DATABASE_URL || process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: dbUrl,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Test database connection
 try {
   const client = await pool.connect();
-  console.log('Successfully connected to database');
+  const result = await client.query('SELECT NOW()');
+  console.log('Successfully connected to database at:', result.rows[0].now);
   client.release();
 } catch (err) {
-  console.error('Database connection error:', err.message);
+  console.error('Database connection error:', err);
   process.exit(1);
 }
 

@@ -2,8 +2,18 @@ import pg from 'pg';
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: process.env.RENDER_INTERNAL_DATABASE_URL || process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Test connection on startup
+pool.connect().then(client => {
+  console.log('Database connected successfully');
+  client.release();
+}).catch(err => {
+  console.error('Database connection error:', err);
 });
 
 async function query(text, params) {
