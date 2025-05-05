@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cd server && npm install",
     "preview": "vite preview",
     "start": "node server/index.js",
     "migrate": "node server/config/migrate.js",
