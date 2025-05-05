@@ -1,90 +1,65 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs').promises;
-const path = require('path');
+const { query } = require('./db');
 
 const app = express();
-const dbPath = path.join(__dirname, 'db.json');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Helper functions
-async function readDB() {
-  try {
-    const data = await fs.readFile(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return { prompts: [] };
-  }
-}
-
-async function writeDB(data) {
-  await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
-}
-
 // Routes
 app.get('/api/prompts', async (req, res) => {
   try {
-    const db = await readDB();
-    res.json(db.prompts);
+    const result = await query('SELECT * FROM prompts ORDER BY created_at DESC');
+    res.json(result.rows);
   } catch (error) {
+    console.error('Error fetching prompts:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
 app.post('/api/prompts', async (req, res) => {
-  console.log('Received POST request to /api/prompts');
-  console.log('Request body:', req.body);
+  const { title, description, prompt, category, type, author } = req.body;
   try {
-    const db = await readDB();
-    console.log('Current DB state:', db);
-    const newPrompt = {
-      _id: Date.now().toString(),
-      ...req.body,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    console.log('New prompt to add:', newPrompt);
-    db.prompts.unshift(newPrompt);
-    await writeDB(db);
-    console.log('Successfully saved to database');
-    res.status(201).json(newPrompt);
+    const result = await query(
+      'INSERT INTO prompts (title, description, prompt, category, type, author) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [title, description, prompt, category, type, author]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error creating prompt:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
 app.put('/api/prompts/:id', async (req, res) => {
+  const { title, description, prompt, category, type, author } = req.body;
   try {
-    const db = await readDB();
-    const index = db.prompts.findIndex(p => p._id === req.params.id);
-    if (index === -1) {
+    const result = await query(
+      'UPDATE prompts SET title = $1, description = $2, prompt = $3, category = $4, type = $5, author = $6, updated_at = CURRENT_TIMESTAMP WHERE _id = $7 RETURNING *',
+      [title, description, prompt, category, type, author, req.params.id]
+    );
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Prompt not found' });
     }
-    const updatedPrompt = {
-      ...db.prompts[index],
-      ...req.body,
-      _id: req.params.id,
-      updatedAt: new Date().toISOString()
-    };
-    db.prompts[index] = updatedPrompt;
-    await writeDB(db);
-    res.json(updatedPrompt);
+    res.json(result.rows[0]);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error updating prompt:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
 app.delete('/api/prompts/:id', async (req, res) => {
   try {
-    const db = await readDB();
-    db.prompts = db.prompts.filter(p => p._id !== req.params.id);
-    await writeDB(db);
-    res.json({ message: 'Prompt deleted successfully' });
+    const result = await query('DELETE FROM prompts WHERE _id = $1', [req.params.id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Prompt not found' });
+    }
+    res.status(204).end();
   } catch (error) {
+    console.error('Error deleting prompt:', error);
     res.status(500).json({ message: error.message });
   }
 });
