@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { OpenAI } = require('openai');
-const { query, pool } = require('./server/db.js');
+const { query, pool } = require('./db.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
