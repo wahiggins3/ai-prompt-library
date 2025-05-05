@@ -3,7 +3,7 @@ services:
   - type: pserv
     name: prompt-library-db
     env: postgres
-    plan: free
+    plan: hobby
     ipAllowList: [] # only allow internal connections
 
   # Then, define the web service that depends on the database
