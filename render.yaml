@@ -2,7 +2,7 @@ services:
   - type: web
     name: prompt-library-api
     env: node
-    buildCommand: npm install
+    buildCommand: npm install && cd server && npm install
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
@@ -11,6 +11,26 @@ services:
         fromDatabase:
           name: prompt-library-db
           property: connectionString
+      - key: PGHOST
+        fromDatabase:
+          name: prompt-library-db
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: prompt-library-db
+          property: port
+      - key: PGUSER
+        fromDatabase:
+          name: prompt-library-db
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: prompt-library-db
+          property: password
+      - key: PGDATABASE
+        fromDatabase:
+          name: prompt-library-db
+          property: database
 
 databases:
   - name: prompt-library-db

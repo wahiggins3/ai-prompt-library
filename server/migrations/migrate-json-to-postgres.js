@@ -15,20 +15,40 @@ console.log('Using database URL:', process.env.RENDER_INTERNAL_DATABASE_URL ? 'R
 // Print available environment variables (without values)
 console.log('Available environment variables:', Object.keys(process.env));
 
-const dbUrl = process.env.DATABASE_URL;
-if (!dbUrl) {
-  console.error('No DATABASE_URL environment variable found');
-  process.exit(1);
-}
-
-console.log('Connecting to database...');
-
-const pool = new Pool({
-  connectionString: dbUrl,
+// Try to use DATABASE_URL first, if not available use individual connection params
+const config = process.env.DATABASE_URL ? {
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
+} : {
+  host: process.env.PGHOST,
+  port: process.env.PGPORT,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  ssl: {
+    rejectUnauthorized: false
+  }
+};
+
+// Check if we have enough connection info
+if (!process.env.DATABASE_URL && (!process.env.PGHOST || !process.env.PGUSER || !process.env.PGPASSWORD)) {
+  console.error('Missing required database connection information');
+  console.error('Need either DATABASE_URL or all of: PGHOST, PGUSER, PGPASSWORD');
+  process.exit(1);
+}
+
+console.log('Database config (without sensitive data):', {
+  host: config.host || 'from connection string',
+  port: config.port || 'from connection string',
+  database: config.database || 'from connection string',
+  ssl: config.ssl
 });
+
+console.log('Connecting to database...');
+
+const pool = new Pool(config);
 
 // Test database connection
 try {
