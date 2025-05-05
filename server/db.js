@@ -1,5 +1,4 @@
-import pg from 'pg';
-const { Pool } = pg;
+const pg = require('pg');
 
 // Default to localhost if no DATABASE_URL is provided
 const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/promptlibrary';
@@ -63,4 +62,4 @@ async function query(text, params) {
   }
 }
 
-export { query, pool };
+module.exports = { query, pool };

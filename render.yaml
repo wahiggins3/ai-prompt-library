@@ -4,11 +4,6 @@ services:
     env: node
     runtime: node
     nodeVersion: 18.x
-    buildCommand: |
-      cd /opt/render/project/src/server
-      npm install -g openai@^4.0.0
-      npm install
-      npm install --save openai@^4.0.0
-    startCommand: NODE_ENV=production node /opt/render/project/src/server/index.js
-    dir: /opt/render/project/src/server
+    buildCommand: npm install
+    startCommand: NODE_ENV=production node server.js
 
