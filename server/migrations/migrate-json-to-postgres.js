@@ -81,6 +81,26 @@ try {
   process.exit(1);
 }
 
+async function createTable() {
+  console.log('Creating prompts table if it doesn\'t exist...');
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS prompts (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        prompt TEXT NOT NULL,
+        category TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('Table created or already exists');
+    return true;
+  } catch (err) {
+    console.error('Error creating table:', err);
+    return false;
+  }
+}
+
 async function migrateData() {
   try {
     // Read JSON file
