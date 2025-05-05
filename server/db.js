@@ -47,12 +47,31 @@ console.log('Database config (without sensitive data):', {
 
 const pool = new Pool(config);
 
-// Test connection on startup
-pool.connect().then(client => {
-  console.log('Database connected successfully');
-  client.release();
-}).catch(err => {
-  console.error('Database connection error:', err);
+// Function to test connection with retries
+async function testConnection(retries = 5, delay = 5000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const client = await pool.connect();
+      console.log('Database connected successfully');
+      const result = await client.query('SELECT NOW()');
+      console.log('Database time:', result.rows[0].now);
+      client.release();
+      return true;
+    } catch (err) {
+      console.error(`Database connection attempt ${i + 1}/${retries} failed:`, err.message);
+      if (i < retries - 1) {
+        console.log(`Retrying in ${delay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw new Error('Failed to connect to database after multiple attempts');
+}
+
+// Test connection on startup with retries
+testConnection().catch(err => {
+  console.error('Final database connection error:', err);
+  // Don't exit process, let the application handle the error
 });
 
 async function query(text, params) {
