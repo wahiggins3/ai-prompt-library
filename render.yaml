@@ -5,5 +5,5 @@ services:
     runtime: node
     nodeVersion: 18.x
     buildCommand: npm install && npm run build
-    startCommand: node server.js
+    startCommand: node server/index.js
 
