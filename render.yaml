@@ -4,6 +4,8 @@ services:
     env: node
     runtime: node
     nodeVersion: 18.x
-    buildCommand: npm install
-    startCommand: NODE_ENV=production node server.js
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: npm start
 
