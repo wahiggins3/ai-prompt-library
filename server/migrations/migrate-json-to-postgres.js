@@ -15,22 +15,42 @@ console.log('Using database URL:', process.env.RENDER_INTERNAL_DATABASE_URL ? 'R
 // Print available environment variables (without values)
 console.log('Available environment variables:', Object.keys(process.env));
 
+// Log environment for debugging
+console.log('Environment:', {
+  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'not set',
+  PGHOST: process.env.PGHOST || 'not set',
+  PGPORT: process.env.PGPORT || 'not set',
+  PGDATABASE: process.env.PGDATABASE || 'not set',
+  PGUSER: process.env.PGUSER ? 'set' : 'not set',
+});
+
 // Try to use DATABASE_URL first, if not available use individual connection params
-const config = process.env.DATABASE_URL ? {
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-} : {
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  ssl: {
-    rejectUnauthorized: false
-  }
-};
+let config;
+
+if (process.env.DATABASE_URL) {
+  console.log('Using DATABASE_URL for connection');
+  config = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  };
+} else if (process.env.PGHOST && process.env.PGUSER) {
+  console.log('Using individual PG* variables for connection');
+  config = {
+    host: process.env.PGHOST,
+    port: parseInt(process.env.PGPORT || '5432', 10),
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    database: process.env.PGDATABASE,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  };
+} else {
+  throw new Error('No database connection information available');
+}
 
 // Check if we have enough connection info
 if (!process.env.DATABASE_URL && (!process.env.PGHOST || !process.env.PGUSER || !process.env.PGPASSWORD)) {

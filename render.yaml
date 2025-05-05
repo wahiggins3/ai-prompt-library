@@ -3,7 +3,7 @@ services:
     name: prompt-library-api
     env: node
     buildCommand: npm install && cd server && npm install
-    startCommand: node server/index.js
+    startCommand: NODE_ENV=production node server/index.js
     envVars:
       - key: NODE_ENV
         value: production
