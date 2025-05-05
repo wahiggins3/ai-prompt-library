@@ -11,8 +11,9 @@ const __dirname = path.dirname(__filename);
 
 const { Pool } = pg;
 
+// In Render's environment, use the internal database URL
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.RENDER_INTERNAL_DATABASE_URL || process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
