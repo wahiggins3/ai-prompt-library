@@ -1,22 +1,20 @@
 import pg from 'pg';
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL is required but not set');
-  process.exit(1);
-}
+// Default to localhost if no DATABASE_URL is provided
+const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/promptlibrary';
 
-console.log('Database URL is configured:', process.env.DATABASE_URL ? 'Yes' : 'No');
+console.log('Using database URL:', dbUrl.replace(/:\/\/[^:]+:[^@]+@/, '://USER:PASSWORD@'));
 
 const config = {
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
+  connectionString: dbUrl,
+  ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
-  },
-  // Add some reasonable defaults for a production environment
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+  } : false,
+  // Connection pool settings
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
 };
 
 console.log('Database config (without sensitive data):', {

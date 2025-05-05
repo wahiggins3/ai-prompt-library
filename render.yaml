@@ -4,14 +4,4 @@ services:
     env: node
     buildCommand: npm install && cd server && npm install
     startCommand: NODE_ENV=production node server/index.js
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        sync: false # Render will automatically inject this
-
-databases:
-  - name: prompt-library-db
-    databaseName: prompt_library
-    plan: hobby
 

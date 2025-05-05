@@ -1,7 +1,26 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { query } from './db.js';
+import { query, pool } from './db.js';
+
+// Test database connection
+pool.connect()
+  .then(client => {
+    console.log('Successfully connected to database');
+    client.query('SELECT NOW()')
+      .then(result => {
+        console.log('Database time:', result.rows[0].now);
+        client.release();
+      })
+      .catch(err => {
+        console.error('Error querying database:', err);
+        client.release();
+      });
+  })
+  .catch(err => {
+    console.error('Error connecting to database:', err);
+    // Don't exit - let the server start anyway
+  });
 
 const app = express();
 
