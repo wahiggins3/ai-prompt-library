@@ -262,8 +262,8 @@ export default function PromptLibrary() {
               .sort((a, b) => (!a[sortOption] || !b[sortOption]) ? 0 : a[sortOption].localeCompare(b[sortOption]))
               .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
               .map((item, index) => (
-              <div key={index} className={`rounded-xl ${categoryColors[item.category] || 'border-gray-300'} ${darkMode ? 'bg-gray-800/50' : 'bg-white'} shadow-sm hover:shadow-md transition-all duration-200 border-2 overflow-hidden flex flex-col h-[200px]`}>
-                <div className="cursor-pointer flex-1 p-4" onClick={() => setModalPrompt(item)}>
+              <div key={index} className={`rounded-xl ${categoryColors[item.category] || 'border-gray-300'} ${darkMode ? 'bg-gray-800/50' : 'bg-white'} shadow-sm hover:shadow-md transition-all duration-200 border-2 overflow-hidden flex flex-col min-h-[250px]`}>
+                <div className="cursor-pointer flex-1 p-4 min-h-[180px]" onClick={() => setModalPrompt(item)}>
                   <div className="font-semibold text-lg mb-1">{item.title}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300 mb-1 line-clamp-2">{item.description}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 italic">by {item.author || "Unknown"}</div>
@@ -272,7 +272,7 @@ export default function PromptLibrary() {
                     <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">{item.type || 'Content Q&A'}</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2 mt-auto">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
