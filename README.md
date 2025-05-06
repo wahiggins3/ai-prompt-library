@@ -1,4 +1,4 @@
-# Box AI Prompt Library
+# AI Prompt Library
 
 A modern web application for organizing, managing, and sharing AI prompts. Built with React and Node.js, this application helps teams and individuals maintain a curated collection of effective AI prompts.
 
