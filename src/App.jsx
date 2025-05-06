@@ -144,9 +144,17 @@ export default function PromptLibrary() {
   };
 
   const handleUpdate = async () => {
-    if (editingPrompt && newPrompt.title && newPrompt.prompt) {
-      // Create update object with all fields
-      const updateData = {
+    if (!editingPrompt) {
+      console.error('No prompt being edited');
+      return;
+    }
+    // Only require the prompt text for validation
+    if (!newPrompt.prompt) {
+      console.error('Prompt text is required');
+      return;
+    }
+    // Create update object with all fields
+    const updateData = {
         ...newPrompt,
         type: newPrompt.type || 'Content Q&A', // Ensure type is included
         updatedAt: new Date().toISOString()
@@ -406,9 +414,13 @@ export default function PromptLibrary() {
         {addModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className={`w-full max-w-2xl ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} p-6 rounded-lg shadow-lg`}>
-              <form onSubmit={(e) => {
+              <form onSubmit={async (e) => {
                 e.preventDefault();
-                isEditing ? handleUpdate() : handleAddPrompt();
+                if (isEditing) {
+                  await handleUpdate();
+                } else {
+                  await handleAddPrompt();
+                }
               }}>
                 <h2 className="text-lg font-semibold mb-3">{isEditing ? 'Edit Prompt' : 'Add New Prompt'}</h2>
                 <div className="space-y-3">
