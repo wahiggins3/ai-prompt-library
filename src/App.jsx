@@ -403,13 +403,13 @@ export default function PromptLibrary() {
                 e.preventDefault();
                 isEditing ? handleUpdate() : handleAddPrompt();
               }}>
-                <h2 className="text-lg font-semibold mb-6">{isEditing ? 'Edit Prompt' : 'Add New Prompt'}</h2>
-                <div className="space-y-4">
+                <h2 className="text-lg font-semibold mb-3">{isEditing ? 'Edit Prompt' : 'Add New Prompt'}</h2>
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Prompt Text</label>
                     <textarea 
                       placeholder="Enter your prompt text here" 
-                      className={`w-full p-2 border rounded-lg h-48 resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                      className={`w-full p-2 border rounded-lg h-40 resize-none ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.prompt} 
                       onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })} 
                     />
@@ -440,42 +440,43 @@ export default function PromptLibrary() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
-                    <input 
-                      type="text" 
-                      placeholder="Enter a descriptive title (max 50 chars)" 
-                      className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
-                      value={newPrompt.title} 
-                      maxLength={50}
-                      onChange={(e) => setNewPrompt({ ...newPrompt, title: e.target.value })} 
-                    />
-                    <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-1">{newPrompt.title.length}/50</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
+                      <input 
+                        type="text" 
+                        placeholder="Enter a descriptive title" 
+                        className={`w-full py-1.5 px-2 border rounded-lg text-sm ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                        value={newPrompt.title} 
+                        maxLength={50}
+                        onChange={(e) => setNewPrompt({ ...newPrompt, title: e.target.value })} 
+                      />
+                      <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-0.5">{newPrompt.title.length}/50</div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Author</label>
+                      <input 
+                        type="text" 
+                        placeholder="Your name or identifier" 
+                        className={`w-full py-1.5 px-2 border rounded-lg text-sm ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                        value={newPrompt.author} 
+                        onChange={(e) => setNewPrompt({ ...newPrompt, author: e.target.value })} 
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Description</label>
                     <input 
                       type="text" 
-                      placeholder="Brief description of what this prompt does (max 120 chars)" 
-                      className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
+                      placeholder="Brief description of what this prompt does" 
+                      className={`w-full py-1.5 px-2 border rounded-lg text-sm ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
                       value={newPrompt.description} 
                       maxLength={120}
                       onChange={(e) => setNewPrompt({ ...newPrompt, description: e.target.value })} 
                     />
-                    <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-1">{newPrompt.description.length}/120</div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Author</label>
-                    <input 
-                      type="text" 
-                      placeholder="Your name or identifier" 
-                      className={`w-full p-2 border rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`} 
-                      value={newPrompt.author} 
-                      onChange={(e) => setNewPrompt({ ...newPrompt, author: e.target.value })} 
-
-                    />
+                    <div className="text-right text-gray-500 dark:text-gray-400 text-xs mt-0.5">{newPrompt.description.length}/120</div>
                   </div>
                 </div>
 
