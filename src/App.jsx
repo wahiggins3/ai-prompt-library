@@ -123,7 +123,11 @@ export default function PromptLibrary() {
   const handleEdit = (prompt) => {
     setEditingPrompt(prompt);
     setIsEditing(true);
-    setNewPrompt({ ...prompt });
+    // Ensure all fields are properly initialized, including type
+    setNewPrompt({
+      ...prompt,
+      type: prompt.type || 'Content Q&A' // Provide default if type is missing
+    });
     setAddModalOpen(true);
   };
 
@@ -141,11 +145,14 @@ export default function PromptLibrary() {
 
   const handleUpdate = async () => {
     if (editingPrompt && newPrompt.title && newPrompt.prompt) {
+      // Create update object with all fields
+      const updateData = {
+        ...newPrompt,
+        type: newPrompt.type || 'Content Q&A', // Ensure type is included
+        updatedAt: new Date().toISOString()
+      };
       try {
-        const response = await axios.put(`${API_URL}/prompts/${editingPrompt._id}`, {
-          ...newPrompt,
-          updatedAt: new Date().toISOString()
-        });
+        const response = await axios.put(`${API_URL}/prompts/${editingPrompt._id}`, updateData);
         setPrompts(prompts.map(p => p._id === editingPrompt._id ? response.data : p));
         resetForm();
         setAddModalOpen(false);
